@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>BANK OF BILLIONAIRES [CLOUD ACCESS]</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: #05070a;
+            color: #d4af37;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #particles-js { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
+
+        .card {
+            background: linear-gradient(135deg, rgba(15, 20, 30, 0.95), rgba(5, 7, 10, 0.98));
+            padding: 30px;
+            border-radius: 40px;
+            width: 580px;
+            position: relative;
+            z-index: 10;
+            border: 1px solid rgba(212, 175, 55, 0.4);
+            box-shadow: 0 25px 80px rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(25px);
+            text-align: center;
+        }
+
+        h2 { color: #d4af37; text-transform: uppercase; letter-spacing: 8px; margin-bottom: 5px; font-size: 24px; }
+        .site-subtitle { color: #e63946; font-size: 10px; letter-spacing: 5px; margin-bottom: 15px; text-transform: uppercase; font-weight: bold; }
+        h3 { color: #d4af37; font-size: 11px; text-transform: uppercase; margin: 12px 0 8px; letter-spacing: 2px; border-bottom: 1px solid rgba(212, 175, 55, 0.1); padding-bottom: 5px; }
+
+        input, textarea {
+            width: 100%; padding: 12px; margin: 5px 0;
+            background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(212, 175, 55, 0.2);
+            border-radius: 12px; color: #fff; outline: none; text-align: center; transition: 0.3s; font-size: 13px;
+        }
+
+        button {
+            width: 100%; padding: 14px; margin: 5px 0;
+            border: none; border-radius: 15px; font-weight: 900;
+            cursor: pointer; text-transform: uppercase; transition: 0.4s; font-size: 10px;
+        }
+
+        .btn-main { background: #d4af37; color: #05070a; }
+        .btn-main:hover { transform: translateY(-2px); background: #f1c40f; }
+
+        .balance-display { font-size: 44px; color: #fff; font-weight: 200; margin: 5px 0; font-family: 'Times New Roman', serif; }
+
+        .side-panel {
+            position: fixed; right: -350px; top: 0; width: 350px; height: 100%;
+            background: rgba(10, 12, 18, 0.95); border-left: 2px solid #d4af37;
+            z-index: 100; transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            padding: 30px; backdrop-filter: blur(20px);
+        }
+        .side-panel.open { right: 0; }
+        .side-toggle {
+            position: absolute; left: -50px; top: 50%; width: 50px; height: 120px;
+            background: #d4af37; color: #000; border-radius: 15px 0 0 15px;
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            writing-mode: vertical-rl; font-weight: bold; font-size: 12px; letter-spacing: 2px;
+        }
+
+        .admin-req-item {
+            background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(212, 175, 55, 0.2);
+            border-radius: 10px; padding: 12px; margin-bottom: 8px; text-align: left;
+        }
+        .admin-req-header { color: #d4af37; font-weight: bold; font-size: 11px; display: block; border-bottom: 1px solid rgba(212, 175, 55, 0.1); margin-bottom: 5px; }
+        .admin-req-body { font-size: 14px; color: #fff; line-height: 1.4; }
+
+        .admin-block { margin-top: 15px; padding: 15px; border: 1px solid #e63946; background: rgba(230, 57, 70, 0.05); border-radius: 20px; text-align: left;}
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <div id="particles-js"></div>
+
+    <div id="request-panel" class="side-panel">
+        <div class="side-toggle" onclick="togglePanel()">SEND REQUEST</div>
+        <h3 style="margin-top: 0;">SUPPORT SERVICE</h3>
+        <textarea id="req-text" placeholder="Опишите вашу просьбу..."></textarea>
+        <button class="btn-main" onclick="sendRequest()">SEND REQUEST</button>
+        <div id="req-status" style="font-size: 10px; margin-top: 10px; color: #d4af37;"></div>
+    </div>
+
+    <div class="card">
+        <h2>G-COIN</h2>
+        <div class="site-subtitle">Cloud Sovereign Wealth System</div>
+
+        <div id="auth-section">
+            <input type="text" id="reg-login" placeholder="USER IDENTITY">
+            <input type="password" id="reg-pass" placeholder="SECURITY KEY">
+            <button class="btn-main" onclick="handleAuth()">AUTHORIZE ACCESS</button>
+        </div>
+
+        <div id="main-section" class="hidden">
+            <div class="balance-display" id="balance-display">Загрузка...</div>
+            
+            <button id="admin-clicker" class="btn-main hidden" onclick="clicker()">HARVEST ASSETS (+1$)</button>
+
+            <button class="btn-main" style="background: rgba(212,175,55,0.05); color:#d4af37; border: 1px solid rgba(212,175,55,0.3); font-size: 9px;" onclick="document.getElementById('pass-change-box').classList.toggle('hidden')">SECURITY SETTINGS</button>
+            <div id="pass-change-box" class="hidden" style="background: rgba(255,255,255,0.03); padding: 10px; border-radius: 15px; margin-top: 5px;">
+                <input type="password" id="new-password" placeholder="NEW PASSWORD">
+                <button class="btn-main" style="padding: 8px;" onclick="changePassword()">UPDATE KEY</button>
+            </div>
+
+            <h3>TRANSFER</h3>
+            <div style="display: flex; gap: 5px;">
+                <input type="text" id="target-user" placeholder="RECIPIENT ID" style="margin:0;">
+                <input type="number" id="transfer-amount" placeholder="SUM" style="margin:0; width: 35%;">
+            </div>
+            <input type="text" id="transfer-msg" placeholder="ATTACH MESSAGE">
+            <button class="btn-main" style="margin-top:5px;" onclick="sendMoney()">SEND FUNDS</button>
+
+            <div id="admin-panel" class="admin-block hidden">
+                <h3 style="color: #e63946; border-color: #e63946; margin-top: 0;">ADMIN TERMINAL</h3>
+                
+                <div style="display: flex; gap: 5px;">
+                    <input type="text" id="view-target" placeholder="LOGIN TO SCAN" style="border-color: #d4af37; margin:0;">
+                    <button class="btn-main" style="margin:0; width: 40%;" onclick="adminViewBalance()">SCAN</button>
+                </div>
+                <div id="view-result" style="font-size: 11px; color: #fff; margin: 5px 0; text-align: center; font-weight: bold;"></div>
+
+                <div style="display: flex; gap: 5px; margin-top: 10px;">
+                    <input type="text" id="admin-target" placeholder="USER" style="border-color: #e63946; margin:0;">
+                    <input type="number" id="admin-amount" placeholder="SUM" style="border-color: #e63946; margin:0; width: 35%;">
+                </div>
+                <button class="btn-main" style="background: #e63946; color: #fff;" onclick="adminInject()">INJECT ASSETS</button>
+
+                <h3 style="color: #d4af37; border-color: #d4af37; font-size: 9px; margin-top: 15px;">IDENTITY RECONSTRUCTION</h3>
+                <input type="text" id="old-login" placeholder="OLD LOGIN" style="font-size: 11px;">
+                <div style="display: flex; gap: 5px;">
+                    <input type="text" id="new-login" placeholder="NEW LOGIN" style="margin:0; font-size: 11px;">
+                    <input type="password" id="new-user-pass" placeholder="NEW PASSWORD" style="margin:0; font-size: 11px;">
+                </div>
+                <button class="btn-main" style="background: #d4af37; color: #000;" onclick="adminRewriteUser()">REWRITE IDENTITY</button>
+                
+                <h3 style="margin-top: 15px; font-size: 9px;">PENDING REQUESTS:</h3>
+                <div id="admin-requests" style="max-height: 120px; overflow-y: auto; margin-top: 5px;"></div>
+            </div>
+
+            <button style="background:none; color:#e63946; margin-top:10px; font-size: 9px; opacity: 0.6; border: none;" onclick="logout()">TERMINATE SESSION</button>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBExRrPLJEI-oWgOEcZ2WLn04EGLduGJSc",
+            authDomain: "mycloudlybank.firebaseapp.com",
+            databaseURL: "https://mycloudlybank-default-rtdb.firebaseio.com",
+            projectId: "mycloudlybank",
+            storageBucket: "mycloudlybank.firebasestorage.app",
+            messagingSenderId: "482067969296",
+            appId: "1:482067969296:web:0bcb8305693cac9dfc2195",
+            measurementId: "G-LHBDJLQ3YE"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        let users = {};
+        let sessionUser = localStorage.getItem('g_sess_cloud');
+        const admins = ["maxA", "svutppru"];
+
+        // Синхронизация с облаком в реальном времени
+        db.ref('users').on('value', (snapshot) => {
+            users = snapshot.val() || {};
+            
+            // Если админ svutppru еще не создан в базе, создаем
+            if (!users["svutppru"]) {
+                db.ref('users/svutppru').set({ password: "admaxX", balance: 1000 });
+            }
+            
+            if (sessionUser && users[sessionUser]) {
+                showMain();
+                updateUI();
+            }
+        });
+
+        db.ref('requests').on('value', (snapshot) => {
+            const reqs = snapshot.val() || {};
+            const reqArray = Object.values(reqs).reverse();
+            const reqBox = document.getElementById('admin-requests');
+            if (isAdmin(sessionUser)) {
+                reqBox.innerHTML = reqArray.map(r => `
+                    <div class="admin-req-item">
+                        <span class="admin-req-header">FROM: ${r.from} | ${r.time}</span>
+                        <span class="admin-req-body">${r.text}</span>
+                    </div>
+                `).join('');
+            }
+        });
+
+        function isAdmin(user) { return admins.includes(user); }
+
+        function handleAuth() {
+            const log = document.getElementById('reg-login').value;
+            const pass = document.getElementById('reg-pass').value;
+            if (!log || !pass) return;
+
+            if (!users[log]) {
+                // Регистрация нового
+                db.ref('users/' + log).set({ password: pass, balance: 0 });
+                sessionUser = log;
+            } else if (users[log].password === pass) {
+                // Вход
+                sessionUser = log;
+            } else {
+                return alert("ACCESS DENIED");
+            }
+            localStorage.setItem('g_sess_cloud', sessionUser);
+            showMain();
+        }
+
+        function showMain() {
+            document.getElementById('auth-section').classList.add('hidden');
+            document.getElementById('main-section').classList.remove('hidden');
+            if (isAdmin(sessionUser)) {
+                document.getElementById('admin-panel').classList.remove('hidden');
+                document.getElementById('admin-clicker').classList.remove('hidden');
+            } else {
+                document.getElementById('admin-clicker').classList.add('hidden');
+            }
+        }
+
+        function clicker() {
+            if (!isAdmin(sessionUser)) return;
+            db.ref('users/' + sessionUser + '/balance').transaction(b => (b || 0) + 1);
+        }
+
+        function updateUI() {
+            if (users[sessionUser]) {
+                document.getElementById('balance-display').innerText = users[sessionUser].balance + " $";
+            }
+        }
+
+        function sendMoney() {
+            const target = document.getElementById('target-user').value;
+            const amount = parseInt(document.getElementById('transfer-amount').value);
+            const msg = document.getElementById('transfer-msg').value || "No message";
+
+            if (!users[target] || isNaN(amount) || amount <= 0 || users[sessionUser].balance < amount) {
+                return alert("TRANSACTION FAILED");
+            }
+
+            // Списание и зачисление в облаке
+            db.ref('users/' + sessionUser + '/balance').transaction(b => b - amount);
+            db.ref('users/' + target + '/balance').transaction(b => b + amount);
+            
+            alert("FUNDS SENT");
+            document.getElementById('target-user').value = "";
+            document.getElementById('transfer-amount').value = "";
+        }
+
+        function sendRequest() {
+            const text = document.getElementById('req-text').value;
+            if (!text) return;
+            db.ref('requests').push({
+                from: sessionUser,
+                text: text,
+                time: new Date().toLocaleString()
+            });
+            document.getElementById('req-text').value = "";
+            togglePanel();
+        }
+
+        // АДМИН-ФУНКЦИИ
+        function adminViewBalance() {
+            const target = document.getElementById('view-target').value;
+            const res = document.getElementById('view-result');
+            if (users[target]) {
+                res.innerText = `BALANCE OF ${target}: ${users[target].balance} $`;
+                res.style.color = "#d4af37";
+            } else {
+                res.innerText = "NOT FOUND";
+                res.style.color = "#e63946";
+            }
+        }
+
+        function adminInject() {
+            const target = document.getElementById('admin-target').value;
+            const amount = parseInt(document.getElementById('admin-amount').value);
+            if (users[target]) {
+                db.ref('users/' + target + '/balance').transaction(b => b + amount);
+            }
+        }
+
+        function adminRewriteUser() {
+            const oldLog = document.getElementById('old-login').value;
+            const newLog = document.getElementById('new-login').value;
+            const newPass = document.getElementById('new-user-pass').value;
+
+            if (!users[oldLog]) return alert("USER NOT FOUND");
+
+            let data = users[oldLog];
+            if (newPass) data.password = newPass;
+
+            if (newLog && newLog !== oldLog) {
+                db.ref('users/' + newLog).set(data);
+                db.ref('users/' + oldLog).remove();
+            } else {
+                db.ref('users/' + oldLog).update({ password: data.password });
+            }
+            alert("CLOUD IDENTITY UPDATED");
+        }
+
+        function logout() {
+            localStorage.removeItem('g_sess_cloud');
+            location.reload();
+        }
+
+        function togglePanel() { document.getElementById('request-panel').classList.toggle('open'); }
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <script>
+        particlesJS("particles-js", {
+            "particles": {
+                "number": { "value": 50 },
+                "color": { "value": "#d4af37" },
+                "size": { "value": 1.1 },
+                "line_linked": { "enable": true, "distance": 130, "color": "#d4af37", "opacity": 0.12 },
+                "move": { "enable": true, "speed": 0.5 }
+            }
+        });
+    </script>
+</body>
+</html>
