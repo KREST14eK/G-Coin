@@ -95,8 +95,8 @@
         <div class="site-subtitle">Облачное хронилище информации баллов</div>
 
         <div id="auth-section">
-            <input type="text" id="reg-login" placeholder="USER IDENTITY">
-            <input type="password" id="reg-pass" placeholder="SECURITY KEY">
+            <input type="text" id="reg-login" placeholder="Логин (ID)">
+            <input type="password" id="reg-pass" placeholder="Пароль">
             <button class="btn-main" onclick="handleAuth()">ВОЙТИ</button>
         </div>
 
@@ -134,19 +134,19 @@
                 </div>
                 <button class="btn-main" style="background: #e63946; color: #fff;" onclick="adminInject()">Приминить</button>
 
-                <h3 style="color: #d4af37; border-color: #d4af37; font-size: 9px; margin-top: 15px;">IDENTITY RECONSTRUCTION</h3>
-                <input type="text" id="old-login" placeholder="OLD LOGIN" style="font-size: 11px;">
+                <h3 style="color: #d4af37; border-color: #d4af37; font-size: 9px; margin-top: 15px;">Изменение личных данных</h3>
+                <input type="text" id="old-login" placeholder="ID" style="font-size: 11px;">
                 <div style="display: flex; gap: 5px;">
-                    <input type="text" id="new-login" placeholder="NEW LOGIN" style="margin:0; font-size: 11px;">
+                    <input type="text" id="new-login" placeholder="NEW ID" style="margin:0; font-size: 11px;">
                     <input type="password" id="new-user-pass" placeholder="NEW PASSWORD" style="margin:0; font-size: 11px;">
                 </div>
                 <button class="btn-main" style="background: #d4af37; color: #000;" onclick="adminRewriteUser()">REWRITE IDENTITY</button>
                 
-                <h3 style="margin-top: 15px; font-size: 9px;">PENDING REQUESTS:</h3>
+                <h3 style="margin-top: 15px; font-size: 9px;">Запросы от детей:</h3>
                 <div id="admin-requests" style="max-height: 120px; overflow-y: auto; margin-top: 5px;"></div>
             </div>
 
-            <button style="background:none; color:#e63946; margin-top:10px; font-size: 9px; opacity: 0.6; border: none;" onclick="logout()">TERMINATE SESSION</button>
+            <button style="background:none; color:#e63946; margin-top:10px; font-size: 9px; opacity: 0.6; border: none;" onclick="logout()">Выйти</button>
         </div>
     </div>
 
@@ -178,10 +178,10 @@
             
             // Если админ svutppru еще не создан в базе, создаем
             if (!users["maxS"]) {
-                db.ref('users/svutppru').set({ password: "maxS9", balance: 100000 });
+                db.ref('users/maxS').set({ password: "maxS9", balance: 100000 });
             }
             if (!users["maxA"]) {
-                db.ref('users/svutppru').set({ password: "maxA5", balance: 100000 });
+                db.ref('users/maxA').set({ password: "maxA5", balance: 100000 });
             }
             
             if (sessionUser && users[sessionUser]) {
@@ -197,7 +197,7 @@
             if (isAdmin(sessionUser)) {
                 reqBox.innerHTML = reqArray.map(r => `
                     <div class="admin-req-item">
-                        <span class="admin-req-header">FROM: ${r.from} | ${r.time}</span>
+                        <span class="admin-req-header">От: ${r.from}
                         <span class="admin-req-body">${r.text}</span>
                     </div>
                 `).join('');
@@ -219,7 +219,7 @@
                 // Вход
                 sessionUser = log;
             } else {
-                return alert("ACCESS DENIED");
+                return alert("Доступ отклонен!");
             }
             localStorage.setItem('g_sess_cloud', sessionUser);
             showMain();
