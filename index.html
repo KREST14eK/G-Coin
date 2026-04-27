@@ -190,19 +190,53 @@
             }
         });
 
-        db.ref('requests').on('value', (snapshot) => {
-            const reqs = snapshot.val() || {};
-            const reqArray = Object.values(reqs).reverse();
-            const reqBox = document.getElementById('admin-requests');
-            if (isAdmin(sessionUser)) {
-                reqBox.innerHTML = reqArray.map(r => `
-                    <div class="admin-req-item">
-                        <span class="admin-req-header">От: ${r.from}
-                        <span class="admin-req-body">${r.text}</span>
-                    </div>
-                `).join('');
-            }
+// Обновленное отображение запросов с кнопкой удаления
+db.ref('requests').on('value', (snapshot) => {
+    const reqs = snapshot.val() || {};
+    const reqBox = document.getElementById('admin-requests');
+    
+    if (isAdmin(sessionUser)) {
+        // Очищаем контейнер перед обновлением
+        reqBox.innerHTML = '';
+        
+        // Перебираем запросы. Используем Object.entries, чтобы получить ID (ключ) для удаления
+        Object.entries(reqs).reverse().forEach(([id, r]) => {
+            reqBox.innerHTML += `
+                <div class="admin-req-item" style="position: relative;">
+                    <span class="admin-req-header">От: ${r.from}</span>
+                    <span class="admin-req-body">${r.text}</span>
+                    <button onclick="deleteRequest('${id}')" 
+                        style="position: absolute; right: 10px; top: 10px; width: auto; padding: 2px 8px; background: #e63946; color: #fff; font-size: 8px;">
+                        DEL
+                    </button>
+                </div>
+            `;
         });
+
+        // Добавляем кнопку "Удалить всё" в самом конце списка
+        if (Object.keys(reqs).length > 0) {
+            reqBox.innerHTML += `
+                <button class="btn-main" style="background: #555; margin-top: 10px;" onclick="clearAllRequests()">
+                    Удалить все запросы
+                </button>
+            `;
+        }
+    }
+});
+
+// НОВАЯ ФУНКЦИЯ: Удаление одного конкретного запроса
+function deleteRequest(requestId) {
+    if (confirm("Удалить этот запрос?")) {
+        db.ref('requests/' + requestId).remove();
+    }
+}
+
+// НОВАЯ ФУНКЦИЯ: Удаление вообще всех запросов сразу
+function clearAllRequests() {
+    if (confirm("Вы уверены, что хотите удалить ВСЕ запросы?")) {
+        db.ref('requests').remove();
+    }
+}
 
         function isAdmin(user) { return admins.includes(user); }
 
