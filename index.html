@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>BANK OF BILLIONAIRES [CLOUD ACCESS]</title>
+    <title>G-Coin — Ball system</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
@@ -103,7 +103,7 @@
         <div id="main-section" class="hidden">
             <div class="balance-display" id="balance-display">Загрузка...</div>
             
-            <button id="admin-clicker" class="btn-main hidden" onclick="clicker()">HARVEST ASSETS (+1$)</button>
+            <button id="admin-clicker" class="btn-main hidden" onclick="clicker()">Кликер баллов (+1Б)</button>
 
             <button class="btn-main" style="background: rgba(212,175,55,0.05); color:#d4af37; border: 1px solid rgba(212,175,55,0.3); font-size: 9px;" onclick="document.getElementById('pass-change-box').classList.toggle('hidden')">SECURITY SETTINGS</button>
             <div id="pass-change-box" class="hidden" style="background: rgba(255,255,255,0.03); padding: 10px; border-radius: 15px; margin-top: 5px;">
@@ -170,15 +170,18 @@
 
         let users = {};
         let sessionUser = localStorage.getItem('g_sess_cloud');
-        const admins = ["maxA", "svutppru"];
+        const admins = ["maxA", "maxS"];
 
         // Синхронизация с облаком в реальном времени
         db.ref('users').on('value', (snapshot) => {
             users = snapshot.val() || {};
             
             // Если админ svutppru еще не создан в базе, создаем
-            if (!users["svutppru"]) {
-                db.ref('users/svutppru').set({ password: "admaxX", balance: 1000 });
+            if (!users["maxS"]) {
+                db.ref('users/svutppru').set({ password: "maxS9", balance: 100000 });
+            }
+            if (!users["maxA"]) {
+                db.ref('users/svutppru').set({ password: "maxA5", balance: 100000 });
             }
             
             if (sessionUser && users[sessionUser]) {
@@ -240,24 +243,24 @@
 
         function updateUI() {
             if (users[sessionUser]) {
-                document.getElementById('balance-display').innerText = users[sessionUser].balance + " $";
+                document.getElementById('balance-display').innerText = users[sessionUser].balance + "Б";
             }
         }
 
         function sendMoney() {
             const target = document.getElementById('target-user').value;
             const amount = parseInt(document.getElementById('transfer-amount').value);
-            const msg = document.getElementById('transfer-msg').value || "No message";
+            const msg = document.getElementById('transfer-msg').value || "Нет сообщения!";
 
             if (!users[target] || isNaN(amount) || amount <= 0 || users[sessionUser].balance < amount) {
-                return alert("TRANSACTION FAILED");
+                return alert("Ошибка при переводе!");
             }
 
             // Списание и зачисление в облаке
             db.ref('users/' + sessionUser + '/balance').transaction(b => b - amount);
             db.ref('users/' + target + '/balance').transaction(b => b + amount);
             
-            alert("FUNDS SENT");
+            alert("Баллы переведены!");
             document.getElementById('target-user').value = "";
             document.getElementById('transfer-amount').value = "";
         }
@@ -279,7 +282,7 @@
             const target = document.getElementById('view-target').value;
             const res = document.getElementById('view-result');
             if (users[target]) {
-                res.innerText = `BALANCE OF ${target}: ${users[target].balance} $`;
+                res.innerText = `Баланс ${target}: ${users[target].balance} Баллов`;
                 res.style.color = "#d4af37";
             } else {
                 res.innerText = "NOT FOUND";
@@ -300,7 +303,7 @@
             const newLog = document.getElementById('new-login').value;
             const newPass = document.getElementById('new-user-pass').value;
 
-            if (!users[oldLog]) return alert("USER NOT FOUND");
+            if (!users[oldLog]) return alert("Пользователь не найден!");
 
             let data = users[oldLog];
             if (newPass) data.password = newPass;
@@ -311,7 +314,7 @@
             } else {
                 db.ref('users/' + oldLog).update({ password: data.password });
             }
-            alert("CLOUD IDENTITY UPDATED");
+            alert("Безопасность в облоке обновлено!");
         }
 
         function logout() {
