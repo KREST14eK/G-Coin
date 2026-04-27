@@ -83,7 +83,7 @@
     <div id="particles-js"></div>
 
     <div id="request-panel" class="side-panel">
-        <div class="side-toggle" onclick="togglePanel()">SEND REQUEST</div>
+        <div class="side-toggle" onclick="togglePanel()">Отправить просьбу...</div>
         <h3 style="margin-top: 0;">SUPPORT SERVICE</h3>
         <textarea id="req-text" placeholder="Опишите вашу просьбу..."></textarea>
         <button class="btn-main" onclick="sendRequest()">SEND REQUEST</button>
@@ -270,8 +270,7 @@
             if (!text) return;
             db.ref('requests').push({
                 from: sessionUser,
-                text: text,
-                time: new Date().toLocaleString()
+                text: text
             });
             document.getElementById('req-text').value = "";
             togglePanel();
@@ -282,10 +281,10 @@
             const target = document.getElementById('view-target').value;
             const res = document.getElementById('view-result');
             if (users[target]) {
-                res.innerText = `Баланс ${target}: ${users[target].balance} Баллов`;
+                res.innerText = `Баланс ${target}: ${users[target].balance}Б`;
                 res.style.color = "#d4af37";
             } else {
-                res.innerText = "NOT FOUND";
+                res.innerText = "Ползователь не найден!";
                 res.style.color = "#e63946";
             }
         }
