@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>G-Coin — Ball system</title>
+    <title>G-COIN — Ball system</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
@@ -83,56 +83,56 @@
     <div id="particles-js"></div>
 
     <div id="request-panel" class="side-panel">
-        <div class="side-toggle" onclick="togglePanel()">Отправить просьбу...</div>
-        <h3 style="margin-top: 0;">SUPPORT SERVICE</h3>
-        <textarea id="req-text" placeholder="Опишите вашу просьбу..."></textarea>
-        <button class="btn-main" onclick="sendRequest()">SEND REQUEST</button>
+        <div class="side-toggle" onclick="togglePanel()">Запросы</div>
+        <h3 style="margin-top: 0;">Просбы для Макса или Отца</h3>
+        <textarea id="req-text" placeholder="Опишите то, что вы хотите..."></textarea>
+        <button class="btn-main" onclick="sendRequest()">Отправить запрос Максу</button>
         <div id="req-status" style="font-size: 10px; margin-top: 10px; color: #d4af37;"></div>
     </div>
 
     <div class="card">
         <h2>G-COIN</h2>
-        <div class="site-subtitle">Cloud Sovereign Wealth System</div>
+        <div class="site-subtitle">Облачное хронилище информации баллов</div>
 
         <div id="auth-section">
             <input type="text" id="reg-login" placeholder="USER IDENTITY">
             <input type="password" id="reg-pass" placeholder="SECURITY KEY">
-            <button class="btn-main" onclick="handleAuth()">AUTHORIZE ACCESS</button>
+            <button class="btn-main" onclick="handleAuth()">ВОЙТИ</button>
         </div>
 
         <div id="main-section" class="hidden">
             <div class="balance-display" id="balance-display">Загрузка...</div>
             
-            <button id="admin-clicker" class="btn-main hidden" onclick="clicker()">Кликер баллов (+1Б)</button>
+            <button id="admin-clicker" class="btn-main hidden" onclick="clicker()">КЛИКЕР (+1Б)</button>
 
-            <button class="btn-main" style="background: rgba(212,175,55,0.05); color:#d4af37; border: 1px solid rgba(212,175,55,0.3); font-size: 9px;" onclick="document.getElementById('pass-change-box').classList.toggle('hidden')">SECURITY SETTINGS</button>
+            <button class="btn-main" style="background: rgba(212,175,55,0.05); color:#d4af37; border: 1px solid rgba(212,175,55,0.3); font-size: 9px;" onclick="document.getElementById('pass-change-box').classList.toggle('hidden')">Настройки безопасности</button>
             <div id="pass-change-box" class="hidden" style="background: rgba(255,255,255,0.03); padding: 10px; border-radius: 15px; margin-top: 5px;">
-                <input type="password" id="new-password" placeholder="NEW PASSWORD">
-                <button class="btn-main" style="padding: 8px;" onclick="changePassword()">UPDATE KEY</button>
+                <input type="password" id="new-password" placeholder="Новый пароль">
+                <button class="btn-main" style="padding: 8px;" onclick="changePassword()">ОБНОВИТЬ</button>
             </div>
 
-            <h3>TRANSFER</h3>
+            <h3>Переводы</h3>
             <div style="display: flex; gap: 5px;">
-                <input type="text" id="target-user" placeholder="RECIPIENT ID" style="margin:0;">
-                <input type="number" id="transfer-amount" placeholder="SUM" style="margin:0; width: 35%;">
+                <input type="text" id="target-user" placeholder="ID" style="margin:0;">
+                <input type="number" id="transfer-amount" placeholder="Сумма перевода" style="margin:0; width: 35%;">
             </div>
-            <input type="text" id="transfer-msg" placeholder="ATTACH MESSAGE">
-            <button class="btn-main" style="margin-top:5px;" onclick="sendMoney()">SEND FUNDS</button>
+            <input type="text" id="transfer-msg" placeholder="Сообщение к переводу">
+            <button class="btn-main" style="margin-top:5px;" onclick="sendMoney()">ОТПРАВИТЬ БАЛЛЫ</button>
 
             <div id="admin-panel" class="admin-block hidden">
-                <h3 style="color: #e63946; border-color: #e63946; margin-top: 0;">ADMIN TERMINAL</h3>
+                <h3 style="color: #e63946; border-color: #e63946; margin-top: 0;">ADMIN PANEL</h3>
                 
                 <div style="display: flex; gap: 5px;">
-                    <input type="text" id="view-target" placeholder="LOGIN TO SCAN" style="border-color: #d4af37; margin:0;">
-                    <button class="btn-main" style="margin:0; width: 40%;" onclick="adminViewBalance()">SCAN</button>
+                    <input type="text" id="view-target" placeholder="ID" style="border-color: #d4af37; margin:0;">
+                    <button class="btn-main" style="margin:0; width: 40%;" onclick="adminViewBalance()">СКАН</button>
                 </div>
                 <div id="view-result" style="font-size: 11px; color: #fff; margin: 5px 0; text-align: center; font-weight: bold;"></div>
 
                 <div style="display: flex; gap: 5px; margin-top: 10px;">
-                    <input type="text" id="admin-target" placeholder="USER" style="border-color: #e63946; margin:0;">
-                    <input type="number" id="admin-amount" placeholder="SUM" style="border-color: #e63946; margin:0; width: 35%;">
+                    <input type="text" id="admin-target" placeholder="ID" style="border-color: #e63946; margin:0;">
+                    <input type="number" id="admin-amount" placeholder="СУММА" style="border-color: #e63946; margin:0; width: 35%;">
                 </div>
-                <button class="btn-main" style="background: #e63946; color: #fff;" onclick="adminInject()">INJECT ASSETS</button>
+                <button class="btn-main" style="background: #e63946; color: #fff;" onclick="adminInject()">Приминить</button>
 
                 <h3 style="color: #d4af37; border-color: #d4af37; font-size: 9px; margin-top: 15px;">IDENTITY RECONSTRUCTION</h3>
                 <input type="text" id="old-login" placeholder="OLD LOGIN" style="font-size: 11px;">
