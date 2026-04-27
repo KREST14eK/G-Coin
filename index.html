@@ -123,24 +123,24 @@
                 <h3 style="color: #e63946; border-color: #e63946; margin-top: 0;">ADMIN PANEL</h3>
                 
                 <div style="display: flex; gap: 5px;">
-                    <input type="text" id="view-target" placeholder="ID" style="border-color: #d4af37; margin:0;">
+                    <input type="text" id="view-target" placeholder="ID для скана" style="border-color: #d4af37; margin:0;">
                     <button class="btn-main" style="margin:0; width: 40%;" onclick="adminViewBalance()">СКАН</button>
                 </div>
                 <div id="view-result" style="font-size: 11px; color: #fff; margin: 5px 0; text-align: center; font-weight: bold;"></div>
 
                 <div style="display: flex; gap: 5px; margin-top: 10px;">
-                    <input type="text" id="admin-target" placeholder="ID" style="border-color: #e63946; margin:0;">
-                    <input type="number" id="admin-amount" placeholder="СУММА" style="border-color: #e63946; margin:0; width: 35%;">
+                    <input type="text" id="admin-target" placeholder="ID для выдачи" style="border-color: #e63946; margin:0;">
+                    <input type="number" id="admin-amount" placeholder="Сумма" style="border-color: #e63946; margin:0; width: 35%;">
                 </div>
                 <button class="btn-main" style="background: #e63946; color: #fff;" onclick="adminInject()">Приминить</button>
 
                 <h3 style="color: #d4af37; border-color: #d4af37; font-size: 9px; margin-top: 15px;">Изменение личных данных</h3>
                 <input type="text" id="old-login" placeholder="ID" style="font-size: 11px;">
                 <div style="display: flex; gap: 5px;">
-                    <input type="text" id="new-login" placeholder="NEW ID" style="margin:0; font-size: 11px;">
-                    <input type="password" id="new-user-pass" placeholder="NEW PASSWORD" style="margin:0; font-size: 11px;">
+                    <input type="text" id="new-login" placeholder="Новый ID" style="margin:0; font-size: 11px;">
+                    <input type="password" id="new-user-pass" placeholder="Новый пароль" style="margin:0; font-size: 11px;">
                 </div>
-                <button class="btn-main" style="background: #d4af37; color: #000;" onclick="adminRewriteUser()">REWRITE IDENTITY</button>
+                <button class="btn-main" style="background: #d4af37; color: #000;" onclick="adminRewriteUser()">Перезаписать</button>
                 
                 <h3 style="margin-top: 15px; font-size: 9px;">Запросы от детей:</h3>
                 <div id="admin-requests" style="max-height: 120px; overflow-y: auto; margin-top: 5px;"></div>
