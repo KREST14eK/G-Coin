@@ -179,6 +179,12 @@
             if (!users["maxA"]) {
                 db.ref('users/maxA').set({ password: "maxA5", balance: 100000 });
             }
+            if (!users["Свят"]) {
+                db.ref('users/Свят').set({ password: "с9", balance: 0 });
+            }
+            if (!users["Миша"]) {
+                db.ref('users/Миша').set({ password: "м5", balance: 0 });
+            }
             
             if (sessionUser && users[sessionUser]) {
                 showMain();
