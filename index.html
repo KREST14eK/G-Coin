@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>G-COIN — Ball system</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
@@ -40,14 +40,13 @@
             border-radius: 28px;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
             width: 100%;
-            max-width: 900px;
+            max-width: 950px;
             position: relative;
-            z-index: 10;
         }
 
         .dashboard {
             display: grid;
-            grid-template-columns: 1fr 1.2fr;
+            grid-template-columns: 1fr 1fr;
             gap: 25px;
             margin-top: 20px;
         }
@@ -73,9 +72,7 @@
             color: white;
             font-size: 14px;
             box-sizing: border-box;
-            transition: 0.3s;
         }
-        input:focus, textarea:focus { border-color: var(--primary); outline: none; background: rgba(15, 23, 42, 0.9); }
 
         button {
             width: 100%;
@@ -90,7 +87,7 @@
             transition: 0.2s;
             margin-bottom: 8px;
         }
-        button:hover { filter: brightness(1.2); transform: translateY(-1px); }
+        button:hover { filter: brightness(1.2); }
 
         .panel-section {
             background: rgba(255, 255, 255, 0.03);
@@ -115,13 +112,12 @@
             padding: 20px;
             border-radius: 20px;
             text-align: center;
-            box-shadow: 0 10px 20px rgba(99, 102, 241, 0.3);
+            margin-bottom: 15px;
         }
         .balance-amount { font-size: 32px; font-weight: 800; }
 
         .history-box {
-            margin-top: 15px;
-            max-height: 250px;
+            max-height: 300px;
             overflow-y: auto;
             background: rgba(0,0,0,0.2);
             border-radius: 15px;
@@ -133,41 +129,7 @@
             font-size: 13px;
         }
 
-        /* Стили для модального окна на весь экран */
-        .modal-full {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: var(--bg);
-            z-index: 2000;
-            display: none;
-            flex-direction: column;
-            padding: 20px;
-            box-sizing: border-box;
-            overflow-y: auto;
-        }
-        .modal-full.active { display: flex; }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 20px;
-            background: rgba(255,255,255,0.05);
-            border-radius: 15px;
-            overflow: hidden;
-        }
-        th, td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-        }
-        th { background: rgba(99, 102, 241, 0.2); color: var(--primary); font-size: 12px; text-transform: uppercase; }
-
-        .btn-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-        }
-
+        /* Кнопка запроса (FAB) */
         .fab-request {
             position: fixed;
             bottom: 30px;
@@ -176,7 +138,7 @@
             height: 60px;
             background: linear-gradient(135deg, #6366f1, #a855f7);
             border-radius: 50%;
-            display: none;
+            display: none; /* Включается через JS */
             justify-content: center;
             align-items: center;
             color: white;
@@ -186,7 +148,9 @@
             z-index: 1000;
             transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
+        .fab-request:active { transform: scale(0.9); }
 
+        /* Шторка для написания запроса */
         .side-drawer {
             position: fixed;
             top: 0; right: -350px; width: 300px; height: 100%;
@@ -201,10 +165,38 @@
             background: rgba(0,0,0,0.6); display: none; z-index: 1000; backdrop-filter: blur(4px);
         }
 
-        .admin-req-item {
-            background: #2b303b; border-radius: 12px; padding: 12px; border-left: 4px solid var(--primary);
-            position: relative; margin-bottom: 10px; padding-right: 45px;
+        /* Модалка истории */
+        .modal-full {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg);
+            z-index: 2000;
+            display: none;
+            flex-direction: column;
+            padding: 20px;
+            box-sizing: border-box;
         }
+        .modal-full.active { display: flex; }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: rgba(255,255,255,0.05);
+            border-radius: 15px;
+            overflow: hidden;
+        }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        th { background: rgba(99, 102, 241, 0.2); color: var(--primary); font-size: 12px; }
+
+        .admin-req-item {
+            background: #2b303b;
+            border-radius: 12px;
+            padding: 12px;
+            border-left: 4px solid var(--primary);
+            position: relative;
+            margin-bottom: 10px;
+        }
+
         .btn-del-small {
             position: absolute; top: 6px; right: 6px; width: 35px; height: 18px;
             background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2);
@@ -214,18 +206,29 @@
 </head>
 <body>
 
+<div id="drawer-overlay" class="drawer-overlay" onclick="toggleDrawer()"></div>
+<div id="side-drawer" class="side-drawer">
+    <h3 style="margin: 0 0 10px 0; color: var(--primary);">Новый запрос</h3>
+    <textarea id="request-text" style="height: 150px; padding: 12px; margin-bottom: 15px;" placeholder="Опиши свою просьбу или вопрос..."></textarea>
+    <button onclick="sendRequestToServer()">Отправить запрос</button>
+    <button onclick="toggleDrawer()" style="background: transparent; border: 1px solid #475569;">Отмена</button>
+</div>
+
+<div id="fab-btn" class="fab-request" onclick="toggleDrawer()">
+    <i class="fas fa-comment-dots"></i>
+</div>
+
 <div id="admin-modal" class="modal-full">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-        <h2 id="modal-title" style="margin:0; color: var(--primary);">Управление</h2>
-        <button onclick="closeAdminModal()" style="width: auto; background: #334155;">Закрыть ✕</button>
+    <div style="display: flex; align-items: center; margin-bottom: 20px;">
+        <button onclick="closeAdminModal()" style="width: auto; background: #334155; margin-right: 20px;">✕ Закрыть</button>
+        <h2 id="modal-title" style="margin:0; color: var(--primary);">История</h2>
     </div>
-    
-    <div style="flex-grow: 1; overflow-y: auto;">
+    <div style="overflow-y: auto;">
         <table>
             <thead>
                 <tr>
                     <th>Дата</th>
-                    <th>Причина</th>
+                    <th>Сообщение</th>
                     <th>Штраф</th>
                     <th>Пополнение</th>
                 </tr>
@@ -233,29 +236,6 @@
             <tbody id="modal-table-body"></tbody>
         </table>
     </div>
-
-    <div class="panel-section" style="background: rgba(15, 23, 42, 0.8); margin-top: 10px;">
-        <div class="panel-title"><i class="fas fa-coins"></i> Новая операция</div>
-        <div class="input-group"><i class="fas fa-comment-alt"></i><input type="text" id="op-reason" placeholder="Причина (сообщение к переводу)"></div>
-        <div class="input-group"><i class="fas fa-money-bill-wave"></i><input type="number" id="op-amount" placeholder="Сумма перевода"></div>
-        <div class="btn-grid">
-            <button style="background: var(--success);" onclick="processOp('plus')">Пополнить</button>
-            <button style="background: var(--accent);" onclick="processOp('minus')">Штраф</button>
-        </div>
-    </div>
-</div>
-
-<div id="drawer-overlay" class="drawer-overlay" onclick="toggleDrawer()"></div>
-
-<div id="fab-btn" class="fab-request" onclick="toggleDrawer()">
-    <i class="fas fa-comment-dots"></i>
-</div>
-
-<div id="side-drawer" class="side-drawer">
-    <h3 style="margin: 0 0 10px 0; color: var(--primary);">Новый запрос</h3>
-    <textarea id="request-text" style="height: 150px; padding: 12px 15px; margin-bottom: 15px;" placeholder="Сообщение для Макса"></textarea>
-    <button onclick="sendRequestToServer()">Отправить запрос</button>
-    <button onclick="toggleDrawer()" style="background: transparent; border: 1px solid #475569;">Отмена</button>
 </div>
 
 <div class="container">
@@ -280,35 +260,8 @@
         </div>
 
         <div class="dashboard">
-            <div class="left-col">
-                <div class="balance-card">
-                    <div style="font-size: 11px; opacity: 0.8; letter-spacing: 1px; text-transform: uppercase;">Мой счет</div>
-                    <div class="balance-amount"><span id="balance-val">0</span> Б</div>
-                </div>
-                <div class="history-box" id="history-box">
-                    <div class="panel-title"><i class="fas fa-list-ul"></i> Операции</div>
-                </div>
-            </div>
-
-            <div class="right-col">
-                <div class="panel-section">
-                    <div class="panel-title"><i class="fas fa-paper-plane"></i> Быстрый перевод</div>
-                    <div class="input-group"><i class="fas fa-at"></i><input type="text" id="target-user" placeholder="Логин получателя"></div>
-                    <div class="input-group"><i class="fas fa-coins"></i><input type="number" id="amount-input" placeholder="Сумма"></div>
-                    <button style="background: var(--success);" onclick="sendMoney()">Отправить средства</button>
-                </div>
-
-                <div id="admin-panel" class="panel-section" style="border-color: var(--accent); display:none;">
-                    <div class="panel-title" style="color: var(--accent);"><i class="fas fa-user-shield"></i> Управление пользователями</div>
-                    <button style="background: #818cf8; margin-bottom: 10px;" onclick="openAdminModal('svyat')">Управление: СВЯТ</button>
-                    <button style="background: #a78bfa;" onclick="openAdminModal('misha')">Управление: МИША</button>
-                </div>
-
-                <div id="admin-req-section" class="panel-section" style="display:none;">
-                    <div class="panel-title" style="color: #8a8dff;"><i class="fas fa-envelope-open-text"></i> Запросы</div>
-                    <div id="admin-requests-container"></div>
-                </div>
-            </div>
+            <div id="left-column"></div>
+            <div id="right-column"></div>
         </div>
     </div>
 </div>
@@ -327,17 +280,14 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
     let currentLogin = null;
-    let targetAdminUser = null; // Тот, кого сейчас редактирует админ
-
     const admins = ['maxS', 'maxA'];
-    function checkAdmin(user) { return admins.includes(user); }
+    const days = ['ВС', 'ПН', 'ВТ', 'СР', 'ЧТ', 'ПТ', 'СБ'];
 
     window.onload = function() {
-        const savedLogin = localStorage.getItem('gcoin_login');
-        const savedPass = localStorage.getItem('gcoin_pass');
-        if (savedLogin && savedPass) {
-            document.getElementById('login-input').value = savedLogin;
-            document.getElementById('pass-input').value = savedPass;
+        const sl = localStorage.getItem('gcoin_login'), sp = localStorage.getItem('gcoin_pass');
+        if (sl && sp) {
+            document.getElementById('login-input').value = sl;
+            document.getElementById('pass-input').value = sp;
             auth(true);
         }
     };
@@ -345,127 +295,73 @@
     function auth(isAuto = false) {
         const login = document.getElementById('login-input').value.trim();
         const pass = document.getElementById('pass-input').value;
-        if (!login || !pass) return alert("Введите логин и пароль");
-
+        if (!login || !pass) return;
         db.ref('users/' + login).once('value', (snap) => {
-            if (snap.exists()) {
-                if (snap.val().password === pass) {
-                    localStorage.setItem('gcoin_login', login);
-                    localStorage.setItem('gcoin_pass', pass);
-                    goMain(login);
-                } else if(!isAuto) alert("Неверный пароль");
-            } else {
-                db.ref('users/' + login).set({ password: pass, balance: 0 }).then(() => {
-                    localStorage.setItem('gcoin_login', login);
-                    localStorage.setItem('gcoin_pass', pass);
-                    goMain(login);
-                });
-            }
+            if (snap.exists() && snap.val().password === pass) {
+                localStorage.setItem('gcoin_login', login);
+                localStorage.setItem('gcoin_pass', pass);
+                renderUI(login);
+            } else if (!snap.exists()) {
+                db.ref('users/' + login).set({ password: pass, balance: 0 }).then(() => renderUI(login));
+            } else if (!isAuto) alert("Ошибка доступа");
         });
     }
 
-    function logout() {
-        localStorage.removeItem('gcoin_login');
-        localStorage.removeItem('gcoin_pass');
-        location.reload();
-    }
+    function logout() { localStorage.clear(); location.reload(); }
 
-    function goMain(login) {
+    function renderUI(login) {
         currentLogin = login;
         document.getElementById('login-screen').classList.remove('active');
         document.getElementById('main-screen').classList.add('active');
         document.getElementById('user-name').innerText = login;
-        document.getElementById('fab-btn').style.display = 'flex';
+        const leftCol = document.getElementById('left-column');
+        const rightCol = document.getElementById('right-column');
+        leftCol.innerHTML = ''; rightCol.innerHTML = '';
 
-        if (checkAdmin(login)) {
-            document.getElementById('admin-panel').style.display = 'block';
-            document.getElementById('admin-req-section').style.display = 'block';
-            initAdminRequests();
-        }
-
-        db.ref('users/' + login + '/balance').on('value', (s) => {
-            document.getElementById('balance-val').innerText = s.val() || 0;
-        });
-
-        db.ref('history').on('value', (snap) => {
-            const box = document.getElementById('history-box');
-            box.innerHTML = '<div class="panel-title"><i class="fas fa-list-ul"></i> Операции</div>';
-            const data = [];
-            snap.forEach(c => { if(c.val().from === login || c.val().to === login) data.push(c.val()); });
-            data.reverse().slice(0,10).forEach(d => {
-                const isOut = d.from === login;
-                box.innerHTML += `
-                    <div class="trans-item">
-                        <span style="color:${isOut?'#f87171':'#4ade80'}; font-weight:bold;">${isOut?'-':'+'} ${d.amount} Б</span>
-                        <div style="font-size:11px; opacity:0.6;">${d.reason || (isOut?'Кому: '+d.to : 'От: '+d.from)}</div>
-                    </div>`;
-            });
-        });
-    }
-
-    // --- НОВАЯ ЛОГИКА АДМИН-ПАНЕЛИ ---
-
-    function openAdminModal(user) {
-        targetAdminUser = user;
-        document.getElementById('modal-title').innerText = "Управление: " + user.toUpperCase();
-        document.getElementById('admin-modal').classList.add('active');
-        
-        // Загрузка истории именно этого пользователя в таблицу
-        db.ref('history').on('value', (snap) => {
-            const tbody = document.getElementById('modal-table-body');
-            tbody.innerHTML = '';
-            const history = [];
-            snap.forEach(child => {
-                const d = child.val();
-                if (d.from === user || d.to === user) history.push(d);
-            });
-            
-            history.reverse().forEach(d => {
-                const isPlus = d.to === user;
-                const date = d.timestamp ? new Date(d.timestamp).toLocaleDateString() : '---';
-                tbody.innerHTML += `
-                    <tr>
-                        <td style="font-size:11px; opacity:0.6;">${date}</td>
-                        <td>${d.reason || 'Без причины'}</td>
-                        <td style="color:#ef4444">${!isPlus ? d.amount + ' Б' : ''}</td>
-                        <td style="color:#22c55e">${isPlus ? d.amount + ' Б' : ''}</td>
-                    </tr>
+        if (admins.includes(login)) {
+            // АДМИН
+            document.getElementById('fab-btn').style.display = 'none'; // Админу не нужна кнопка запроса
+            ['svyat', 'misha'].forEach(user => {
+                const section = document.createElement('div');
+                section.className = 'panel-section';
+                section.innerHTML = `
+                    <div class="panel-title" style="justify-content:space-between">
+                        <span><i class="fas fa-user-gear"></i> ${user.toUpperCase()}</span>
+                        <span id="bal-${user}" style="color:var(--primary)">0 Б</span>
+                    </div>
+                    <div class="input-group"><i class="fas fa-comment"></i><input type="text" id="msg-${user}" placeholder="Сообщение"></div>
+                    <div class="input-group"><i class="fas fa-coins"></i><input type="number" id="amt-${user}" placeholder="Сумма"></div>
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                        <button style="background:var(--success)" onclick="adminAction('${user}', 'plus')">Пополнить</button>
+                        <button style="background:var(--accent)" onclick="adminAction('${user}', 'minus')">Штраф</button>
+                    </div>
+                    <button style="background:#475569; margin-top:5px" onclick="openAdminModal('${user}')">Таблица истории</button>
                 `;
+                leftCol.appendChild(section);
+                db.ref(`users/${user}/balance`).on('value', s => {
+                    document.getElementById(`bal-${user}`).innerText = (s.val() || 0) + ' Б';
+                });
             });
-        });
+            rightCol.innerHTML = `<div class="panel-section" style="height: 100%; min-height: 400px;">
+                <div class="panel-title"><i class="fas fa-envelope-open-text"></i> Запросы</div>
+                <div id="admin-requests-container"></div>
+            </div>`;
+            initAdminRequests();
+        } else {
+            // ПОЛЬЗОВАТЕЛЬ
+            document.getElementById('fab-btn').style.display = 'flex'; // Показываем кнопку
+            leftCol.innerHTML = `<div class="balance-card"><div style="font-size:11px; opacity:0.8;">МОЙ СЧЕТ</div><div class="balance-amount" id="balance-val">0 Б</div></div>
+                <div class="history-box" id="history-box"><div class="panel-title">ОПЕРАЦИИ</div></div>`;
+            rightCol.innerHTML = `<div class="panel-section"><div class="panel-title">ПЕРЕВОД</div>
+                <div class="input-group"><i class="fas fa-at"></i><input type="text" id="target-user" placeholder="Кому"></div>
+                <div class="input-group"><i class="fas fa-coins"></i><input type="number" id="amount-input" placeholder="Сумма"></div>
+                <button style="background:var(--success)" onclick="sendMoney()">Отправить</button></div>`;
+            db.ref(`users/${login}/balance`).on('value', s => document.getElementById('balance-val').innerText = (s.val() || 0) + ' Б');
+            initUserHistory(login);
+        }
     }
 
-    function closeAdminModal() {
-        document.getElementById('admin-modal').classList.remove('active');
-        db.ref('history').off(); // Отключаем прослушку, чтобы не тратить ресурс
-    }
-
-    function processOp(type) {
-        const amount = parseInt(document.getElementById('op-amount').value);
-        const reason = document.getElementById('op-reason').value.trim();
-        
-        if (!amount || amount <= 0 || !reason) return alert("Введите сумму и причину!");
-
-        const finalAmount = type === 'plus' ? amount : -amount;
-
-        db.ref('users/' + targetAdminUser + '/balance').transaction(curr => (curr || 0) + finalAmount);
-        
-        // Записываем в историю
-        db.ref('history').push({
-            from: type === 'plus' ? "Центробанк" : targetAdminUser,
-            to: type === 'plus' ? targetAdminUser : "Штраф",
-            amount: amount,
-            reason: reason,
-            timestamp: Date.now()
-        });
-
-        alert("Выполнено!");
-        document.getElementById('op-amount').value = '';
-        document.getElementById('op-reason').value = '';
-    }
-
-    // --- ОСТАЛЬНЫЕ ФУНКЦИИ ---
-
+    // Управление шторкой
     function toggleDrawer() {
         const dr = document.getElementById('side-drawer');
         const ov = document.getElementById('drawer-overlay');
@@ -475,41 +371,89 @@
 
     function sendRequestToServer() {
         const txt = document.getElementById('request-text').value.trim();
-        if (!txt) return;
-        db.ref('requests').push({ from: currentLogin, text: txt, timestamp: Date.now() });
-        alert("Отправлено!");
+        if (!txt) return alert("Напиши сообщение!");
+        db.ref('requests').push({
+            from: currentLogin,
+            text: txt,
+            timestamp: Date.now()
+        });
+        alert("Запрос отправлен!");
         document.getElementById('request-text').value = '';
         toggleDrawer();
     }
 
+    function adminAction(user, type) {
+        const amt = parseInt(document.getElementById(`amt-${user}`).value);
+        const msg = document.getElementById(`msg-${user}`).value.trim();
+        if (!amt || !msg) return alert("Заполни данные!");
+        const change = type === 'plus' ? amt : -amt;
+        db.ref(`users/${user}/balance`).transaction(c => (c || 0) + change);
+        db.ref('history').push({ from: type==='plus'?'Центробанк':user, to: type==='plus'?user:'Штраф', amount: amt, reason: msg, timestamp: Date.now() });
+        document.getElementById(`amt-${user}`).value = ''; document.getElementById(`msg-${user}`).value = '';
+    }
+
+    function openAdminModal(user) {
+        document.getElementById('modal-title').innerText = "История: " + user.toUpperCase();
+        document.getElementById('admin-modal').classList.add('active');
+        db.ref('history').on('value', snap => {
+            const tbody = document.getElementById('modal-table-body');
+            tbody.innerHTML = '';
+            const list = [];
+            snap.forEach(c => { if(c.val().from === user || c.val().to === user) list.push(c.val()); });
+            list.reverse().forEach(d => {
+                const isPlus = d.to === user;
+                const dt = new Date(d.timestamp);
+                tbody.innerHTML += `<tr>
+                    <td style="font-size:10px">${dt.toLocaleDateString()} (${days[dt.getDay()]})</td>
+                    <td>${d.reason}</td>
+                    <td style="color:var(--accent)">${!isPlus ? d.amount : ''}</td>
+                    <td style="color:var(--success)">${isPlus ? d.amount : ''}</td>
+                </tr>`;
+            });
+        });
+    }
+
+    function closeAdminModal() { document.getElementById('admin-modal').classList.remove('active'); db.ref('history').off(); }
+
     function initAdminRequests() {
-        db.ref('requests').on('value', (snap) => {
+        db.ref('requests').on('value', snap => {
             const container = document.getElementById('admin-requests-container');
             container.innerHTML = '';
             Object.entries(snap.val() || {}).reverse().forEach(([id, r]) => {
-                container.innerHTML += `
-                    <div class="admin-req-item">
-                        <span style="font-size:10px; color:var(--primary)">${r.from}</span><br>${r.text}
-                        <button class="btn-del-small" onclick="db.ref('requests/${id}').remove()">DEL</button>
-                    </div>`;
+                container.innerHTML += `<div class="admin-req-item">
+                    <div style="font-size:10px; color:var(--primary)">ОТ: ${r.from}</div>
+                    <div style="font-size:13px">${r.text}</div>
+                    <button class="btn-del-small" onclick="db.ref('requests/${id}').remove()">DEL</button></div>`;
             });
         });
     }
 
     function sendMoney() {
-        const target = document.getElementById('target-user').value.trim();
-        const amount = parseInt(document.getElementById('amount-input').value);
-        if (!target || !amount || amount <= 0) return alert("Ошибка данных");
-
-        db.ref('users/' + target).once('value', (tsnap) => {
-            if (!tsnap.exists()) return alert("Нет такого юзера");
-            db.ref('users/' + currentLogin + '/balance').once('value', (msnap) => {
-                const myB = msnap.val() || 0;
-                if (myB < amount) return alert("Мало баллов");
-                db.ref('users/' + currentLogin + '/balance').set(myB - amount);
-                db.ref('users/' + target + '/balance').transaction(b => (b || 0) + amount);
-                db.ref('history').push({ from: currentLogin, to: target, amount: amount, timestamp: Date.now() });
+        const target = document.getElementById('target-user').value.trim(), amt = parseInt(document.getElementById('amount-input').value);
+        if (!target || !amt || amt <= 0) return;
+        db.ref(`users/${target}`).once('value', s => {
+            if (!s.exists()) return alert("Нет такого юзера");
+            db.ref(`users/${currentLogin}/balance`).once('value', ms => {
+                if (ms.val() < amt) return alert("Мало баллов");
+                db.ref(`users/${currentLogin}/balance`).set(ms.val() - amt);
+                db.ref(`users/${target}/balance`).transaction(b => (b || 0) + amt);
+                db.ref('history').push({ from: currentLogin, to: target, amount: amt, timestamp: Date.now(), reason: 'Перевод' });
                 alert("Переведено!");
+            });
+        });
+    }
+
+    function initUserHistory(login) {
+        db.ref('history').on('value', snap => {
+            const box = document.getElementById('history-box');
+            box.innerHTML = '<div class="panel-title">ОПЕРАЦИИ</div>';
+            const list = [];
+            snap.forEach(c => { if(c.val().from === login || c.val().to === login) list.push(c.val()); });
+            list.reverse().slice(0,10).forEach(d => {
+                const isOut = d.from === login;
+                box.innerHTML += `<div class="trans-item">
+                    <span style="color:${isOut?'#f87171':'#4ade80'}">${isOut?'-':'+'} ${d.amount} Б</span>
+                    <div style="font-size:11px; opacity:0.6">${d.reason || (isOut?'Кому: '+d.to : 'От: '+d.from)}</div></div>`;
             });
         });
     }
