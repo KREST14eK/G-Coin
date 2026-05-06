@@ -2,356 +2,517 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>G-COIN — Ball system</title>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        
+        :root {
+            --primary: #6366f1;
+            --primary-hover: #4f46e5;
+            --bg: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.8);
+            --text: #f1f5f9;
+            --accent: #ef4444;
+            --success: #22c55e;
+        }
+
         body {
-            font-family: 'Montserrat', sans-serif;
-            background-color: #05070a;
-            color: #d4af37;
-            overflow: hidden;
-            height: 100vh;
+            font-family: 'Inter', sans-serif;
+            background: radial-gradient(circle at top left, #1e1b4b, #0f172a);
+            color: var(--text);
             display: flex;
             justify-content: center;
             align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            overflow-x: hidden;
         }
 
-        #particles-js { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
-
-        .card {
-            background: linear-gradient(135deg, rgba(15, 20, 30, 0.95), rgba(5, 7, 10, 0.98));
-            padding: 30px;
-            border-radius: 40px;
-            width: 580px;
+        .container {
+            background: var(--card-bg);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 25px;
+            border-radius: 28px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            width: 100%;
+            max-width: 900px;
             position: relative;
             z-index: 10;
-            border: 1px solid rgba(212, 175, 55, 0.4);
-            box-shadow: 0 25px 80px rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(25px);
-            text-align: center;
         }
 
-        h2 { color: #d4af37; text-transform: uppercase; letter-spacing: 8px; margin-bottom: 5px; font-size: 24px; }
-        .site-subtitle { color: #e63946; font-size: 10px; letter-spacing: 5px; margin-bottom: 15px; text-transform: uppercase; font-weight: bold; }
-        h3 { color: #d4af37; font-size: 11px; text-transform: uppercase; margin: 12px 0 8px; letter-spacing: 2px; border-bottom: 1px solid rgba(212, 175, 55, 0.1); padding-bottom: 5px; }
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+            gap: 25px;
+            margin-top: 20px;
+        }
 
+        @media (max-width: 768px) {
+            .dashboard { grid-template-columns: 1fr; }
+        }
+
+        .screen { display: none; }
+        .active { display: block; animation: fadeIn 0.5s ease; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
+
+        .input-group { position: relative; margin-bottom: 12px; }
+        .input-group i { position: absolute; left: 12px; top: 12px; color: #94a3b8; font-size: 14px; }
+        
         input, textarea {
-            width: 100%; padding: 12px; margin: 5px 0;
-            background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(212, 175, 55, 0.2);
-            border-radius: 12px; color: #fff; outline: none; text-align: center; transition: 0.3s; font-size: 13px;
+            width: 100%;
+            padding: 10px 10px 10px 35px;
+            background: rgba(15, 23, 42, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            color: white;
+            font-size: 14px;
+            box-sizing: border-box;
+            transition: 0.3s;
         }
+        input:focus, textarea:focus { border-color: var(--primary); outline: none; background: rgba(15, 23, 42, 0.9); }
 
         button {
-            width: 100%; padding: 14px; margin: 5px 0;
-            border: none; border-radius: 15px; font-weight: 900;
-            cursor: pointer; text-transform: uppercase; transition: 0.4s; font-size: 10px;
+            width: 100%;
+            padding: 12px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            margin-bottom: 8px;
+        }
+        button:hover { filter: brightness(1.2); transform: translateY(-1px); }
+
+        .panel-section {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 18px;
+            border-radius: 20px;
+            margin-bottom: 15px;
+        }
+        .panel-title {
+            font-size: 13px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
-        .btn-main { background: #d4af37; color: #05070a; }
-        .btn-main:hover { transform: translateY(-2px); background: #f1c40f; }
-
-        .balance-display { font-size: 44px; color: #fff; font-weight: 200; margin: 5px 0; font-family: 'Times New Roman', serif; }
-
-        .side-panel {
-            position: fixed; right: -350px; top: 0; width: 350px; height: 100%;
-            background: rgba(10, 12, 18, 0.95); border-left: 2px solid #d4af37;
-            z-index: 100; transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            padding: 30px; backdrop-filter: blur(20px);
+        .balance-card {
+            background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+            padding: 20px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 10px 20px rgba(99, 102, 241, 0.3);
         }
-        .side-panel.open { right: 0; }
-        .side-toggle {
-            position: absolute; left: -50px; top: 50%; width: 50px; height: 120px;
-            background: #d4af37; color: #000; border-radius: 15px 0 0 15px;
-            cursor: pointer; display: flex; align-items: center; justify-content: center;
-            writing-mode: vertical-rl; font-weight: bold; font-size: 12px; letter-spacing: 2px;
+        .balance-amount { font-size: 32px; font-weight: 800; }
+
+        .history-box {
+            margin-top: 15px;
+            max-height: 250px;
+            overflow-y: auto;
+            background: rgba(0,0,0,0.2);
+            border-radius: 15px;
+            padding: 12px;
+        }
+        .trans-item {
+            padding: 8px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            font-size: 13px;
+        }
+
+        /* Стили для модального окна на весь экран */
+        .modal-full {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg);
+            z-index: 2000;
+            display: none;
+            flex-direction: column;
+            padding: 20px;
+            box-sizing: border-box;
+            overflow-y: auto;
+        }
+        .modal-full.active { display: flex; }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 15px;
+            overflow: hidden;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        th { background: rgba(99, 102, 241, 0.2); color: var(--primary); font-size: 12px; text-transform: uppercase; }
+
+        .btn-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .fab-request {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #6366f1, #a855f7);
+            border-radius: 50%;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 24px;
+            box-shadow: 0 10px 25px rgba(99, 102, 241, 0.5);
+            cursor: pointer;
+            z-index: 1000;
+            transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .side-drawer {
+            position: fixed;
+            top: 0; right: -350px; width: 300px; height: 100%;
+            background: #1e293b; border-left: 1px solid rgba(255,255,255,0.1);
+            box-shadow: -10px 0 30px rgba(0,0,0,0.5); z-index: 1001;
+            transition: 0.4s ease; padding: 30px; display: flex; flex-direction: column;
+        }
+        .side-drawer.open { right: 0; }
+        .drawer-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6); display: none; z-index: 1000; backdrop-filter: blur(4px);
         }
 
         .admin-req-item {
-            background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(212, 175, 55, 0.2);
-            border-radius: 10px; padding: 12px; margin-bottom: 8px; text-align: left;
+            background: #2b303b; border-radius: 12px; padding: 12px; border-left: 4px solid var(--primary);
+            position: relative; margin-bottom: 10px; padding-right: 45px;
         }
-        .admin-req-header { color: #d4af37; font-weight: bold; font-size: 11px; display: block; border-bottom: 1px solid rgba(212, 175, 55, 0.1); margin-bottom: 5px; }
-        .admin-req-body { font-size: 14px; color: #fff; line-height: 1.4; }
-
-        .admin-block { margin-top: 15px; padding: 15px; border: 1px solid #e63946; background: rgba(230, 57, 70, 0.05); border-radius: 20px; text-align: left;}
-        .hidden { display: none !important; }
+        .btn-del-small {
+            position: absolute; top: 6px; right: 6px; width: 35px; height: 18px;
+            background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2);
+            border-radius: 4px; font-size: 8px; font-weight: 800; cursor: pointer;
+        }
     </style>
 </head>
 <body>
 
-    <div id="particles-js"></div>
-
-    <div id="request-panel" class="side-panel">
-        <div class="side-toggle" onclick="togglePanel()">Запросы</div>
-        <h3 style="margin-top: 0;">Просбы для Макса или Отца</h3>
-        <textarea id="req-text" placeholder="Опишите то, что вы хотите..."></textarea>
-        <button class="btn-main" onclick="sendRequest()">Отправить запрос Максу</button>
-        <div id="req-status" style="font-size: 10px; margin-top: 10px; color: #d4af37;"></div>
+<div id="admin-modal" class="modal-full">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h2 id="modal-title" style="margin:0; color: var(--primary);">Управление</h2>
+        <button onclick="closeAdminModal()" style="width: auto; background: #334155;">Закрыть ✕</button>
+    </div>
+    
+    <div style="flex-grow: 1; overflow-y: auto;">
+        <table>
+            <thead>
+                <tr>
+                    <th>Дата</th>
+                    <th>Причина</th>
+                    <th>Штраф</th>
+                    <th>Пополнение</th>
+                </tr>
+            </thead>
+            <tbody id="modal-table-body"></tbody>
+        </table>
     </div>
 
-    <div class="card">
-        <h2>G-COIN</h2>
-        <div class="site-subtitle">Облачное хранилище информации баллов</div>
-
-        <div id="auth-section">
-            <input type="text" id="reg-login" placeholder="Логин (ID)">
-            <input type="password" id="reg-pass" placeholder="Пароль">
-            <button class="btn-main" onclick="handleAuth()">ВОЙТИ</button>
+    <div class="panel-section" style="background: rgba(15, 23, 42, 0.8); margin-top: 10px;">
+        <div class="panel-title"><i class="fas fa-coins"></i> Новая операция</div>
+        <div class="input-group"><i class="fas fa-comment-alt"></i><input type="text" id="op-reason" placeholder="Причина (сообщение к переводу)"></div>
+        <div class="input-group"><i class="fas fa-money-bill-wave"></i><input type="number" id="op-amount" placeholder="Сумма перевода"></div>
+        <div class="btn-grid">
+            <button style="background: var(--success);" onclick="processOp('plus')">Пополнить</button>
+            <button style="background: var(--accent);" onclick="processOp('minus')">Штраф</button>
         </div>
+    </div>
+</div>
 
-        <div id="main-section" class="hidden">
-            <div class="balance-display" id="balance-display">Загрузка...</div>
-            
-            <button class="btn-main" style="background: rgba(212,175,55,0.05); color:#d4af37; border: 1px solid rgba(212,175,55,0.3); font-size: 9px;" onclick="document.getElementById('pass-change-box').classList.toggle('hidden')">Настройки безопасности</button>
-            <div id="pass-change-box" class="hidden" style="background: rgba(255,255,255,0.03); padding: 10px; border-radius: 15px; margin-top: 5px;">
-                <input type="password" id="new-password" placeholder="Новый пароль">
-                <button class="btn-main" style="padding: 8px;" onclick="changePassword()">ОБНОВИТЬ</button>
-            </div>
+<div id="drawer-overlay" class="drawer-overlay" onclick="toggleDrawer()"></div>
 
-            <h3>Переводы</h3>
-            <div style="display: flex; gap: 5px;">
-                <input type="text" id="target-user" placeholder="ID" style="margin:0;">
-                <input type="number" id="transfer-amount" placeholder="Сумма перевода" style="margin:0; width: 35%;">
-            </div>
-            <input type="text" id="transfer-msg" placeholder="Сообщение к переводу">
-            <button class="btn-main" style="margin-top:5px;" onclick="sendMoney()">ОТПРАВИТЬ БАЛЛЫ</button>
+<div id="fab-btn" class="fab-request" onclick="toggleDrawer()">
+    <i class="fas fa-comment-dots"></i>
+</div>
 
-            <div id="admin-panel" class="admin-block hidden">
-                <h3 style="color: #e63946; border-color: #e63946; margin-top: 0;">ADMIN PANEL</h3>
-                
-                <div style="display: flex; gap: 5px;">
-                    <input type="text" id="view-target" placeholder="ID для скана" style="border-color: #d4af37; margin:0;">
-                    <button class="btn-main" style="margin:0; width: 40%;" onclick="adminViewBalance()">СКАН</button>
-                </div>
-                <div id="view-result" style="font-size: 11px; color: #fff; margin: 5px 0; text-align: center; font-weight: bold;"></div>
+<div id="side-drawer" class="side-drawer">
+    <h3 style="margin: 0 0 10px 0; color: var(--primary);">Новый запрос</h3>
+    <textarea id="request-text" style="height: 150px; padding: 12px 15px; margin-bottom: 15px;" placeholder="Сообщение для Макса"></textarea>
+    <button onclick="sendRequestToServer()">Отправить запрос</button>
+    <button onclick="toggleDrawer()" style="background: transparent; border: 1px solid #475569;">Отмена</button>
+</div>
 
-                <div style="display: flex; gap: 5px; margin-top: 10px;">
-                    <input type="text" id="admin-target" placeholder="ID для выдачи" style="border-color: #e63946; margin:0;">
-                    <input type="number" id="admin-amount" placeholder="Сумма" style="border-color: #e63946; margin:0; width: 35%;">
-                </div>
-                <button class="btn-main" style="background: #e63946; color: #fff;" onclick="adminInject()">Приминить</button>
-
-                <h3 style="color: #d4af37; border-color: #d4af37; font-size: 9px; margin-top: 15px;">Изменение личных данных</h3>
-                <input type="text" id="old-login" placeholder="ID" style="font-size: 11px;">
-                <div style="display: flex; gap: 5px;">
-                    <input type="text" id="new-login" placeholder="Новый ID" style="margin:0; font-size: 11px;">
-                    <input type="password" id="new-user-pass" placeholder="Новый пароль" style="margin:0; font-size: 11px;">
-                </div>
-                <button class="btn-main" style="background: #d4af37; color: #000;" onclick="adminRewriteUser()">Перезаписать</button>
-                
-                <h3 style="margin-top: 15px; font-size: 9px;">Запросы от детей:</h3>
-                <div id="admin-requests" style="max-height: 120px; overflow-y: auto; margin-top: 5px;"></div>
-            </div>
-
-            <button style="background:none; color:#e63946; margin-top:10px; font-size: 9px; opacity: 0.6; border: none;" onclick="logout()">Выйти</button>
+<div class="container">
+    <div id="login-screen" class="screen active">
+        <div style="max-width: 320px; margin: 0 auto; text-align: center;">
+            <i class="fas fa-shield-halved" style="font-size: 60px; color: var(--primary); margin-bottom: 20px;"></i>
+            <h2 style="margin: 0 0 25px 0;">G-COIN</h2>
+            <div class="input-group"><i class="fas fa-user"></i><input type="text" id="login-input" placeholder="Логин"></div>
+            <div class="input-group"><i class="fas fa-lock"></i><input type="password" id="pass-input" placeholder="Пароль"></div>
+            <button onclick="auth()">Войти в систему</button>
         </div>
     </div>
 
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <div id="main-screen" class="screen">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <div style="font-weight: bold; font-size: 18px;">
+                <i class="fas fa-user-circle"></i> <span id="user-name"></span>
+            </div>
+            <button onclick="logout()" style="width: auto; padding: 8px 15px; background: #334155; margin:0;">
+                <i class="fas fa-sign-out-alt"></i> Выход
+            </button>
+        </div>
 
-    <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyBExRrPLJEI-oWgOEcZ2WLn04EGLduGJSc",
-            authDomain: "mycloudlybank.firebaseapp.com",
-            databaseURL: "https://mycloudlybank-default-rtdb.firebaseio.com",
-            projectId: "mycloudlybank",
-            storageBucket: "mycloudlybank.firebasestorage.app",
-            messagingSenderId: "482067969296",
-            appId: "1:482067969296:web:0bcb8305693cac9dfc2195",
-            measurementId: "G-LHBDJLQ3YE"
-        };
+        <div class="dashboard">
+            <div class="left-col">
+                <div class="balance-card">
+                    <div style="font-size: 11px; opacity: 0.8; letter-spacing: 1px; text-transform: uppercase;">Мой счет</div>
+                    <div class="balance-amount"><span id="balance-val">0</span> Б</div>
+                </div>
+                <div class="history-box" id="history-box">
+                    <div class="panel-title"><i class="fas fa-list-ul"></i> Операции</div>
+                </div>
+            </div>
 
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
+            <div class="right-col">
+                <div class="panel-section">
+                    <div class="panel-title"><i class="fas fa-paper-plane"></i> Быстрый перевод</div>
+                    <div class="input-group"><i class="fas fa-at"></i><input type="text" id="target-user" placeholder="Логин получателя"></div>
+                    <div class="input-group"><i class="fas fa-coins"></i><input type="number" id="amount-input" placeholder="Сумма"></div>
+                    <button style="background: var(--success);" onclick="sendMoney()">Отправить средства</button>
+                </div>
 
-        let users = {};
-        let sessionUser = localStorage.getItem('g_sess_cloud');
-        const admins = ["maxA", "maxS"];
+                <div id="admin-panel" class="panel-section" style="border-color: var(--accent); display:none;">
+                    <div class="panel-title" style="color: var(--accent);"><i class="fas fa-user-shield"></i> Управление пользователями</div>
+                    <button style="background: #818cf8; margin-bottom: 10px;" onclick="openAdminModal('svyat')">Управление: СВЯТ</button>
+                    <button style="background: #a78bfa;" onclick="openAdminModal('misha')">Управление: МИША</button>
+                </div>
 
-        db.ref('users').on('value', (snapshot) => {
-            users = snapshot.val() || {};
-            
-            if (!users["maxS"]) {
-                db.ref('users/maxS').set({ password: "maxS9", balance: 100000 });
-            }
-            if (!users["maxA"]) {
-                db.ref('users/maxA').set({ password: "maxA5", balance: 100000 });
-            }
-            if (!users["Свят"]) {
-                db.ref('users/Свят').set({ password: "с9", balance: 0 });
-            }
-            if (!users["Миша"]) {
-                db.ref('users/Миша').set({ password: "м5", balance: 0 });
-            }
-            
-            if (sessionUser && users[sessionUser]) {
-                showMain();
-                updateUI();
-            }
-        });
+                <div id="admin-req-section" class="panel-section" style="display:none;">
+                    <div class="panel-title" style="color: #8a8dff;"><i class="fas fa-envelope-open-text"></i> Запросы</div>
+                    <div id="admin-requests-container"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
-        db.ref('requests').on('value', (snapshot) => {
-            const reqs = snapshot.val() || {};
-            const reqBox = document.getElementById('admin-requests');
-            
-            if (isAdmin(sessionUser)) {
-                reqBox.innerHTML = '';
-                Object.entries(reqs).reverse().forEach(([id, r]) => {
-                    reqBox.innerHTML += `
-                        <div class="admin-req-item" style="position: relative;">
-                            <span class="admin-req-header">От: ${r.from}</span>
-                            <span class="admin-req-body">${r.text}</span>
-                            <button onclick="deleteRequest('${id}')" 
-                                style="position: absolute; right: 10px; top: 10px; width: auto; padding: 2px 8px; background: #e63946; color: #fff; font-size: 8px;">
-                                DEL
-                            </button>
-                        </div>
-                    `;
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyBExRrPLJEI-oWgOEcZ2WLn04EGLduGJSc",
+        authDomain: "mycloudlybank.firebaseapp.com",
+        databaseURL: "https://mycloudlybank-default-rtdb.firebaseio.com",
+        projectId: "mycloudlybank",
+        storageBucket: "mycloudlybank.firebasestorage.app",
+        messagingSenderId: "482067969296",
+        appId: "1:482067969296:web:0bcb8305693cac9dfc2195"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+    let currentLogin = null;
+    let targetAdminUser = null; // Тот, кого сейчас редактирует админ
+
+    const admins = ['maxS', 'maxA'];
+    function checkAdmin(user) { return admins.includes(user); }
+
+    window.onload = function() {
+        const savedLogin = localStorage.getItem('gcoin_login');
+        const savedPass = localStorage.getItem('gcoin_pass');
+        if (savedLogin && savedPass) {
+            document.getElementById('login-input').value = savedLogin;
+            document.getElementById('pass-input').value = savedPass;
+            auth(true);
+        }
+    };
+
+    function auth(isAuto = false) {
+        const login = document.getElementById('login-input').value.trim();
+        const pass = document.getElementById('pass-input').value;
+        if (!login || !pass) return alert("Введите логин и пароль");
+
+        db.ref('users/' + login).once('value', (snap) => {
+            if (snap.exists()) {
+                if (snap.val().password === pass) {
+                    localStorage.setItem('gcoin_login', login);
+                    localStorage.setItem('gcoin_pass', pass);
+                    goMain(login);
+                } else if(!isAuto) alert("Неверный пароль");
+            } else {
+                db.ref('users/' + login).set({ password: pass, balance: 0 }).then(() => {
+                    localStorage.setItem('gcoin_login', login);
+                    localStorage.setItem('gcoin_pass', pass);
+                    goMain(login);
                 });
-
-                if (Object.keys(reqs).length > 0) {
-                    reqBox.innerHTML += `
-                        <button class="btn-main" style="background: #555; margin-top: 10px;" onclick="clearAllRequests()">
-                            Удалить все запросы
-                        </button>
-                    `;
-                }
             }
         });
+    }
 
-        function deleteRequest(requestId) {
-            if (confirm("Удалить этот запрос?")) {
-                db.ref('requests/' + requestId).remove();
-            }
+    function logout() {
+        localStorage.removeItem('gcoin_login');
+        localStorage.removeItem('gcoin_pass');
+        location.reload();
+    }
+
+    function goMain(login) {
+        currentLogin = login;
+        document.getElementById('login-screen').classList.remove('active');
+        document.getElementById('main-screen').classList.add('active');
+        document.getElementById('user-name').innerText = login;
+        document.getElementById('fab-btn').style.display = 'flex';
+
+        if (checkAdmin(login)) {
+            document.getElementById('admin-panel').style.display = 'block';
+            document.getElementById('admin-req-section').style.display = 'block';
+            initAdminRequests();
         }
 
-        function clearAllRequests() {
-            if (confirm("Вы уверены, что хотите удалить ВСЕ запросы?")) {
-                db.ref('requests').remove();
-            }
-        }
+        db.ref('users/' + login + '/balance').on('value', (s) => {
+            document.getElementById('balance-val').innerText = s.val() || 0;
+        });
 
-        function isAdmin(user) { return admins.includes(user); }
-
-        function handleAuth() {
-            const log = document.getElementById('reg-login').value;
-            const pass = document.getElementById('reg-pass').value;
-            if (!log || !pass) return;
-
-            if (!users[log]) {
-                db.ref('users/' + log).set({ password: pass, balance: 0 });
-                sessionUser = log;
-            } else if (users[log].password === pass) {
-                sessionUser = log;
-            } else {
-                return alert("Доступ отклонен!");
-            }
-            localStorage.setItem('g_sess_cloud', sessionUser);
-            showMain();
-        }
-
-        function showMain() {
-            document.getElementById('auth-section').classList.add('hidden');
-            document.getElementById('main-section').classList.remove('hidden');
-            if (isAdmin(sessionUser)) {
-                document.getElementById('admin-panel').classList.remove('hidden');
-            }
-        }
-
-        function updateUI() {
-            if (users[sessionUser]) {
-                document.getElementById('balance-display').innerText = users[sessionUser].balance + "Б";
-            }
-        }
-
-        function sendMoney() {
-            const target = document.getElementById('target-user').value;
-            const amount = parseInt(document.getElementById('transfer-amount').value);
-            const msg = document.getElementById('transfer-msg').value || "Нет сообщения!";
-
-            if (!users[target] || isNaN(amount) || amount <= 0 || users[sessionUser].balance < amount) {
-                return alert("Ошибка при переводе!");
-            }
-
-            db.ref('users/' + sessionUser + '/balance').transaction(b => b - amount);
-            db.ref('users/' + target + '/balance').transaction(b => b + amount);
-            
-            alert("Баллы переведены!");
-            document.getElementById('target-user').value = "";
-            document.getElementById('transfer-amount').value = "";
-        }
-
-        function sendRequest() {
-            const text = document.getElementById('req-text').value;
-            if (!text) return;
-            db.ref('requests').push({
-                from: sessionUser,
-                text: text
+        db.ref('history').on('value', (snap) => {
+            const box = document.getElementById('history-box');
+            box.innerHTML = '<div class="panel-title"><i class="fas fa-list-ul"></i> Операции</div>';
+            const data = [];
+            snap.forEach(c => { if(c.val().from === login || c.val().to === login) data.push(c.val()); });
+            data.reverse().slice(0,10).forEach(d => {
+                const isOut = d.from === login;
+                box.innerHTML += `
+                    <div class="trans-item">
+                        <span style="color:${isOut?'#f87171':'#4ade80'}; font-weight:bold;">${isOut?'-':'+'} ${d.amount} Б</span>
+                        <div style="font-size:11px; opacity:0.6;">${d.reason || (isOut?'Кому: '+d.to : 'От: '+d.from)}</div>
+                    </div>`;
             });
-            document.getElementById('req-text').value = "";
-            togglePanel();
-        }
-
-        function adminViewBalance() {
-            const target = document.getElementById('view-target').value;
-            const res = document.getElementById('view-result');
-            if (users[target]) {
-                res.innerText = `Баланс ${target}: ${users[target].balance}Б`;
-                res.style.color = "#d4af37";
-            } else {
-                res.innerText = "Ползователь не найден!";
-                res.style.color = "#e63946";
-            }
-        }
-
-        function adminInject() {
-            const target = document.getElementById('admin-target').value;
-            const amount = parseInt(document.getElementById('admin-amount').value);
-            if (users[target]) {
-                db.ref('users/' + target + '/balance').transaction(b => b + amount);
-            }
-        }
-
-        function adminRewriteUser() {
-            const oldLog = document.getElementById('old-login').value;
-            const newLog = document.getElementById('new-login').value;
-            const newPass = document.getElementById('new-user-pass').value;
-
-            if (!users[oldLog]) return alert("Пользователь не найден!");
-
-            let data = users[oldLog];
-            if (newPass) data.password = newPass;
-
-            if (newLog && newLog !== oldLog) {
-                db.ref('users/' + newLog).set(data);
-                db.ref('users/' + oldLog).remove();
-            } else {
-                db.ref('users/' + oldLog).update({ password: data.password });
-            }
-            alert("Безопасность в облаке обновлена!");
-        }
-
-        function logout() {
-            localStorage.removeItem('g_sess_cloud');
-            location.reload();
-        }
-
-        function togglePanel() { document.getElementById('request-panel').classList.toggle('open'); }
-    </script>
-
-    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
-    <script>
-        particlesJS("particles-js", {
-            "particles": {
-                "number": { "value": 50 },
-                "color": { "value": "#d4af37" },
-                "size": { "value": 1.1 },
-                "line_linked": { "enable": true, "distance": 130, "color": "#d4af37", "opacity": 0.12 },
-                "move": { "enable": true, "speed": 0.5 }
-            }
         });
-    </script>
+    }
+
+    // --- НОВАЯ ЛОГИКА АДМИН-ПАНЕЛИ ---
+
+    function openAdminModal(user) {
+        targetAdminUser = user;
+        document.getElementById('modal-title').innerText = "Управление: " + user.toUpperCase();
+        document.getElementById('admin-modal').classList.add('active');
+        
+        // Загрузка истории именно этого пользователя в таблицу
+        db.ref('history').on('value', (snap) => {
+            const tbody = document.getElementById('modal-table-body');
+            tbody.innerHTML = '';
+            const history = [];
+            snap.forEach(child => {
+                const d = child.val();
+                if (d.from === user || d.to === user) history.push(d);
+            });
+            
+            history.reverse().forEach(d => {
+                const isPlus = d.to === user;
+                const date = d.timestamp ? new Date(d.timestamp).toLocaleDateString() : '---';
+                tbody.innerHTML += `
+                    <tr>
+                        <td style="font-size:11px; opacity:0.6;">${date}</td>
+                        <td>${d.reason || 'Без причины'}</td>
+                        <td style="color:#ef4444">${!isPlus ? d.amount + ' Б' : ''}</td>
+                        <td style="color:#22c55e">${isPlus ? d.amount + ' Б' : ''}</td>
+                    </tr>
+                `;
+            });
+        });
+    }
+
+    function closeAdminModal() {
+        document.getElementById('admin-modal').classList.remove('active');
+        db.ref('history').off(); // Отключаем прослушку, чтобы не тратить ресурс
+    }
+
+    function processOp(type) {
+        const amount = parseInt(document.getElementById('op-amount').value);
+        const reason = document.getElementById('op-reason').value.trim();
+        
+        if (!amount || amount <= 0 || !reason) return alert("Введите сумму и причину!");
+
+        const finalAmount = type === 'plus' ? amount : -amount;
+
+        db.ref('users/' + targetAdminUser + '/balance').transaction(curr => (curr || 0) + finalAmount);
+        
+        // Записываем в историю
+        db.ref('history').push({
+            from: type === 'plus' ? "Центробанк" : targetAdminUser,
+            to: type === 'plus' ? targetAdminUser : "Штраф",
+            amount: amount,
+            reason: reason,
+            timestamp: Date.now()
+        });
+
+        alert("Выполнено!");
+        document.getElementById('op-amount').value = '';
+        document.getElementById('op-reason').value = '';
+    }
+
+    // --- ОСТАЛЬНЫЕ ФУНКЦИИ ---
+
+    function toggleDrawer() {
+        const dr = document.getElementById('side-drawer');
+        const ov = document.getElementById('drawer-overlay');
+        dr.classList.toggle('open');
+        ov.style.display = dr.classList.contains('open') ? 'block' : 'none';
+    }
+
+    function sendRequestToServer() {
+        const txt = document.getElementById('request-text').value.trim();
+        if (!txt) return;
+        db.ref('requests').push({ from: currentLogin, text: txt, timestamp: Date.now() });
+        alert("Отправлено!");
+        document.getElementById('request-text').value = '';
+        toggleDrawer();
+    }
+
+    function initAdminRequests() {
+        db.ref('requests').on('value', (snap) => {
+            const container = document.getElementById('admin-requests-container');
+            container.innerHTML = '';
+            Object.entries(snap.val() || {}).reverse().forEach(([id, r]) => {
+                container.innerHTML += `
+                    <div class="admin-req-item">
+                        <span style="font-size:10px; color:var(--primary)">${r.from}</span><br>${r.text}
+                        <button class="btn-del-small" onclick="db.ref('requests/${id}').remove()">DEL</button>
+                    </div>`;
+            });
+        });
+    }
+
+    function sendMoney() {
+        const target = document.getElementById('target-user').value.trim();
+        const amount = parseInt(document.getElementById('amount-input').value);
+        if (!target || !amount || amount <= 0) return alert("Ошибка данных");
+
+        db.ref('users/' + target).once('value', (tsnap) => {
+            if (!tsnap.exists()) return alert("Нет такого юзера");
+            db.ref('users/' + currentLogin + '/balance').once('value', (msnap) => {
+                const myB = msnap.val() || 0;
+                if (myB < amount) return alert("Мало баллов");
+                db.ref('users/' + currentLogin + '/balance').set(myB - amount);
+                db.ref('users/' + target + '/balance').transaction(b => (b || 0) + amount);
+                db.ref('history').push({ from: currentLogin, to: target, amount: amount, timestamp: Date.now() });
+                alert("Переведено!");
+            });
+        });
+    }
+</script>
 </body>
 </html>
